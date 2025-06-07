@@ -1,12 +1,15 @@
 package com.example.mobilecontroller
 
 import android.app.Activity
+import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -38,7 +41,11 @@ import java.net.InetAddress
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
+    private lateinit var sensorManager: SensorManager
+    private lateinit var gyroscopeSensor: Sensor
 
+    private val _gyroData = mutableStateOf("X: 0.00\nY: 0.00\nZ: 0.00")
+    val gyroData: State<String> get() = _gyroData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,26 +55,49 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    UdpClientScreen()
+                    UdpClientScreen(gyroData = gyroData)
                 }
             }
         }
-
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) ?: run {
+            Toast.makeText(this,"device not support gyroscope",Toast.LENGTH_SHORT).show()
+            return;
+        }
 
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        TODO("Not yet implemented")
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if(event.sensor.type == Sensor.TYPE_GYROSCOPE)
+        {
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+
+            runOnUiThread {
+                _gyroData.value = "X: ${String.format("%.2f", x)} rad/s\nY: ${String.format("%.2f", y)} rad/s\nZ: ${String.format("%.2f", z)} rad/s"
+            }
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UdpClientScreen() {
+fun UdpClientScreen(gyroData: State<String>) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val view = LocalView.current
@@ -251,6 +281,30 @@ fun UdpClientScreen() {
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "gyroscope:",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(vertical = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Text(
+                    text = gyroData.value, // 直接使用 State 的 value
+                    modifier = Modifier.padding(16.dp),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 消息显示区域
             Card(
@@ -363,6 +417,6 @@ private fun disconnect(
 @Composable
 fun DefaultPreview() {
     MobileControllerTheme {
-        UdpClientScreen()
+        //UdpClientScreen(gyroData = gyroData)
     }
 }
