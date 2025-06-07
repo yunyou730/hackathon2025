@@ -1,0 +1,91 @@
+using System;
+using System.Net;
+using System.Text;
+using TMPro;
+using UnityEngine;
+
+namespace amaz
+{
+    public class DebugMenu : BaseMenu
+    {
+        public TextMeshProUGUI _serverStateLabel = null;
+        public TextMeshProUGUI _p1Label = null;
+        public TextMeshProUGUI _p2Label = null;
+        public TextMeshProUGUI _msgLabel = null;
+        
+        private NetworkManager _networkManager = null;
+        private EventDispatcher _dispatcher = null;
+        
+        private StringBuilder _networkInfo = new StringBuilder();
+        
+        private String _serverIP;
+        private int _serverPort;
+        
+        public void Awake()
+        {
+            _networkManager = RacingGame.Instance().GetService<NetworkManager>();
+            _dispatcher = RacingGame.Instance().GetService<EventDispatcher>();
+            Debug.Log("DebugMenu Awake");
+            
+            _dispatcher.AddListener<Byte[]>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
+        }
+
+        public void Start()
+        {
+            _networkManager = RacingGame.Instance().GetService<NetworkManager>();
+            Debug.Log("DebugMenu Start");            
+        }
+
+        public void Update()
+        {
+            String info = BuildServerInfo();
+            String p1 = BuildP1Info();
+            String p2 = BuildP2Info();
+            String msg = BuildMsgInfo();
+            
+            _serverStateLabel.text = info;
+        }
+
+        public void OnDestroy()
+        {
+            _dispatcher.RemoveListener<Byte[]>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
+        }
+
+        private void OnNetworkData(Byte[] data)
+        {
+            Debug.Log("DebugMenu OnNetworkData:" + BitConverter.ToString(data));
+        }
+
+        private String BuildServerInfo()
+        {
+            if (_networkManager != null)
+            {
+                _networkManager.GetServerIPAndPort(out _serverIP, out _serverPort);
+                _serverIP = _networkManager.GetLocalIPAddress();
+                _networkInfo.Clear();
+                _networkInfo.Append($"host:{_serverIP}:{_serverPort}");
+
+                return _networkInfo.ToString();                
+            }
+            return "server not ready?";
+        }
+
+        private String BuildP1Info()
+        {
+            return "p1:xx";
+        }
+
+        private String BuildP2Info()
+        {
+            return "p2:xx";
+        }
+
+        private String BuildMsgInfo()
+        {
+            
+            return String.Empty;
+        }
+        
+        
+    }
+}
