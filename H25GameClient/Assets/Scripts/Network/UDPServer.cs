@@ -84,7 +84,7 @@ namespace amaz
                     {
                         Data = receiveBytes,
                         RemoteEndPoint = remote,
-                        Message = Encoding.UTF8.GetString(receiveBytes)
+                        //Message = Encoding.UTF8.GetString(receiveBytes)
                     });
                 }
                 catch (SocketException ex)
@@ -132,7 +132,7 @@ namespace amaz
     {
         public byte[] Data { get; set; }
         public IPEndPoint RemoteEndPoint { get; set; }
-        public string Message { get; set; }
+        //public string Message { get; set; }
     }
 
     public class ErrorEventArgs : EventArgs

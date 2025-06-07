@@ -10,11 +10,11 @@ namespace amaz
     public class NetworkManager : BaseService
     {
         private UDPServer _server = null;
-        private List<Byte[]> _receivedData = null;
+        private List<DataReceivedEventArgs> _receivedData = null;
         
         public NetworkManager()
         {
-            _receivedData = new List<Byte[]>();
+            _receivedData = new List<DataReceivedEventArgs>();
             
             _server = new UDPServer(8873);
             _server.DataReceived += OnDataReceivedInSubThread;
@@ -73,9 +73,9 @@ namespace amaz
             }
         }
         
-        private void OnData(Byte[] data)
+        private void OnData(DataReceivedEventArgs data)
         {
-            Debug.Log("[network_data]" + BitConverter.ToString(data));
+            Debug.Log("[network_data]" + BitConverter.ToString(data.Data));
             RacingGame.Instance().GetService<EventDispatcher>().Dispatch(EventDefine.NETWORK_RECV_DATA,data);
         }
 
@@ -98,7 +98,7 @@ namespace amaz
         {
             lock (_receivedData)
             {
-                _receivedData.Add(args.Data);
+                _receivedData.Add(args);
             }
         }
 

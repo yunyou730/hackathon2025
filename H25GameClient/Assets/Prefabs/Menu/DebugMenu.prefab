@@ -663,6 +663,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _serverStateLabel: {fileID: 5317642194015273457}
-  _p1Label: {fileID: 0}
-  _p2Label: {fileID: 0}
-  _msgLabel: {fileID: 0}
+  _p1Label: {fileID: 2264145243107951747}
+  _p2Label: {fileID: 7028888890503029527}
+  _msgLabel: {fileID: 2674933997598411640}

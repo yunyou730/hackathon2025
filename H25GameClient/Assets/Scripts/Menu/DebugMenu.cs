@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Mime;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace amaz
             _dispatcher = RacingGame.Instance().GetService<EventDispatcher>();
             Debug.Log("DebugMenu Awake");
             
-            _dispatcher.AddListener<Byte[]>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
+            _dispatcher.AddListener<DataReceivedEventArgs>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
         }
 
         public void Start()
@@ -48,12 +49,17 @@ namespace amaz
 
         public void OnDestroy()
         {
-            _dispatcher.RemoveListener<Byte[]>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
+            _dispatcher.RemoveListener<DataReceivedEventArgs>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
         }
 
-        private void OnNetworkData(Byte[] data)
+        private void OnNetworkData(DataReceivedEventArgs data)
         {
-            Debug.Log("DebugMenu OnNetworkData:" + BitConverter.ToString(data));
+            string msg = Encoding.UTF8.GetString(data.Data);
+            IPEndPoint remote = data.RemoteEndPoint;
+
+            string info = $"[addr]{remote.Address} [bin]{BitConverter.ToString(data.Data)} [msg]{msg}"; 
+            Debug.Log(info);
+            _msgLabel.text = info;
         }
 
         private String BuildServerInfo()
