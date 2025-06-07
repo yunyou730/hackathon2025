@@ -7,8 +7,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,9 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.example.mobilecontroller.ui.theme.MobileControllerTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -61,10 +58,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) ?: run {
-            Toast.makeText(this,"device not support gyroscope",Toast.LENGTH_SHORT).show()
-            return;
+            Toast.makeText(this, "设备不支持陀螺仪", Toast.LENGTH_SHORT).show()
+            return
         }
-
     }
 
     override fun onResume() {
@@ -78,8 +74,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        if(event.sensor.type == Sensor.TYPE_GYROSCOPE)
-        {
+        if (event.sensor.type == Sensor.TYPE_GYROSCOPE) {
             val x = event.values[0]
             val y = event.values[1]
             val z = event.values[2]
@@ -91,7 +86,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        //TODO("Not yet implemented")
+        // 不需要实现
     }
 }
 
@@ -99,7 +94,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 @Composable
 fun UdpClientScreen(gyroData: State<String>) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope() // 创建 CoroutineScope
     val view = LocalView.current
 
     // 状态管理
@@ -115,7 +110,7 @@ fun UdpClientScreen(gyroData: State<String>) {
     val statusBarColor = MaterialTheme.colorScheme.primaryContainer
     val navigationBarColor = MaterialTheme.colorScheme.surface
 
-    // 设置状态栏和导航栏颜色（修复后的代码）
+    // 设置状态栏和导航栏颜色
     DisposableEffect(view) {
         if (!view.isInEditMode) {
             val window = (context as? Activity)?.window
@@ -127,7 +122,8 @@ fun UdpClientScreen(gyroData: State<String>) {
         }
 
         onDispose {
-            // 清理操作（可选）
+            // 清理操作
+            disconnect(socket, receiverJob, isConnected)
         }
     }
 
@@ -157,6 +153,7 @@ fun UdpClientScreen(gyroData: State<String>) {
                             if (isConnected.value) {
                                 // 断开连接
                                 disconnect(socket, receiverJob, isConnected)
+                                messages.add("已断开连接")
                             } else {
                                 // 连接
                                 scope.launch {
@@ -168,7 +165,8 @@ fun UdpClientScreen(gyroData: State<String>) {
                                             socket = socket,
                                             receiverJob = receiverJob,
                                             isConnected = isConnected,
-                                            messages = messages
+                                            messages = messages,
+                                            scope = scope // 传递 CoroutineScope
                                         )
                                         messages.add("已连接到 ${ipAddress.value.text}:$portNum")
                                     } catch (e: Exception) {
@@ -249,12 +247,7 @@ fun UdpClientScreen(gyroData: State<String>) {
                     onValueChange = { port.value = it },
                     label = { Text("端口") },
                     modifier = Modifier.weight(1f),
-                    singleLine = true,
-
-
-                    //keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(
-                    //    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
-                    //)
+                    singleLine = true
                 )
             }
 
@@ -282,7 +275,7 @@ fun UdpClientScreen(gyroData: State<String>) {
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "gyroscope:",
+                text = "陀螺仪数据:",
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
@@ -297,7 +290,7 @@ fun UdpClientScreen(gyroData: State<String>) {
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Text(
-                    text = gyroData.value, // 直接使用 State 的 value
+                    text = gyroData.value,
                     modifier = Modifier.padding(16.dp),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
@@ -330,22 +323,23 @@ fun UdpClientScreen(gyroData: State<String>) {
     }
 }
 
-// 连接到UDP服务器
+// 连接到UDP服务器（修改：添加 scope 参数）
 private suspend fun connect(
     ip: String,
     port: Int,
     socket: MutableState<DatagramSocket?>,
     receiverJob: MutableState<kotlinx.coroutines.Job?>,
     isConnected: MutableState<Boolean>,
-    messages: MutableList<String>
+    messages: MutableList<String>,
+    scope: CoroutineScope // 新增参数
 ) = withContext(Dispatchers.IO) {
     try {
         // 创建UDP套接字
         socket.value = DatagramSocket()
         isConnected.value = true
 
-        // 启动接收消息的协程
-        receiverJob.value = launch {
+        // 使用传递的 scope 启动协程（在IO线程接收数据，在主线程更新UI）
+        receiverJob.value = scope.launch(Dispatchers.IO) {
             val buffer = ByteArray(1024)
             while (isConnected.value) {
                 try {
@@ -353,6 +347,7 @@ private suspend fun connect(
                     socket.value?.receive(packet)
                     val message = String(packet.data, 0, packet.length)
 
+                    // 切换到主线程更新UI
                     withContext(Dispatchers.Main) {
                         messages.add("收到: $message")
                     }
@@ -360,7 +355,7 @@ private suspend fun connect(
                     if (isConnected.value) {
                         withContext(Dispatchers.Main) {
                             messages.add("接收消息出错: ${e.message}")
-                            isConnected.value = false
+                            disconnect(socket, receiverJob, isConnected)
                         }
                     }
                     break
@@ -370,7 +365,7 @@ private suspend fun connect(
     } catch (e: Exception) {
         withContext(Dispatchers.Main) {
             messages.add("连接错误: ${e.message}")
-            isConnected.value = false
+            disconnect(socket, receiverJob, isConnected)
         }
         throw e
     }
@@ -417,6 +412,8 @@ private fun disconnect(
 @Composable
 fun DefaultPreview() {
     MobileControllerTheme {
-        //UdpClientScreen(gyroData = gyroData)
+        // 创建一个临时的gyroData状态用于预览
+        val tempGyroData = remember { mutableStateOf("X: 0.00\nY: 0.00\nZ: 0.00") }
+        UdpClientScreen(gyroData = tempGyroData)
     }
 }
