@@ -6,9 +6,12 @@ namespace amaz.gameplay.pong
     {
         public EPlayer _player = EPlayer.None;
         public float _moveSpeed = 5.0f;
-        public Vector2 _bound;
-        
+        private Vector2 _bound;
         private PlayerController _playerController = null;
+        
+        public Transform _kickOffPoint = null;
+        
+        private Football _football = null;
         
         void Start()
         {
@@ -25,14 +28,45 @@ namespace amaz.gameplay.pong
 
         void Update()
         {
+            if (_football != null && _playerController.Left())
+            {
+                DoKickOff();
+            }
+
+            UpdateMovement(Time.deltaTime);
+        }
+        
+        public void SetBound(Vector2 bound)
+        {
+            _bound = bound;
+        }
+
+        public void CatchFootball(Football football)
+        {
+            football.transform.position = _kickOffPoint.position;
+            _football = football;
+        }
+
+        private void DoKickOff()
+        {
+            if (_football != null)
+            {
+                _football.Dash();
+            }
+
+            _football = null;
+        }
+
+        private void UpdateMovement(float deltaTime)
+        {
             float delta = 0.0f;
             if(_playerController != null && _playerController.Up())
             {
-                delta = _moveSpeed * Time.deltaTime;
+                delta = _moveSpeed * deltaTime;
             }
             if(_playerController != null && _playerController.Down())
             {
-                delta = -_moveSpeed * Time.deltaTime;
+                delta = -_moveSpeed * deltaTime;
             }
             if (Mathf.Abs(delta) > 0.0f)
             {

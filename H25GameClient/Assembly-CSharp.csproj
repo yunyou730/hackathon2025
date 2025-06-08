@@ -66,6 +66,7 @@
     <Compile Include="Assets/Scripts/Gameplay/Pong/PlayerController.cs" />
     <Compile Include="Assets/Scripts/Menu/MenuManager.cs" />
     <Compile Include="Assets/Scripts/Gameplay/Pong/P1Controller.cs" />
+    <Compile Include="Assets/Scripts/Gameplay/Pong/Football.cs" />
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader" />
