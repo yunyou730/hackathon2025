@@ -44,6 +44,8 @@ namespace amaz
             RegisterService<GameplayManager>(_gameplay);
             RegisterService<InputManager>(_inputManager);
             
+            _inputManager.Init();
+            
             _menuManager.ShowMenu(MenuManager.EMenu.DebugMenu);
             _menuManager.ShowMenu(MenuManager.EMenu.HUD);
             _gameplay.StartGame(_launcherMono.GameplayPrefab);
@@ -87,6 +89,4 @@ namespace amaz
             return service;
         }
     }
-
 }
-

@@ -2,8 +2,10 @@ using System;
 using System.Net;
 using System.Net.Mime;
 using System.Text;
+using amaz.gameplay;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace amaz
 {
@@ -13,11 +15,15 @@ namespace amaz
         public TextMeshProUGUI _p1Label = null;
         public TextMeshProUGUI _p2Label = null;
         public TextMeshProUGUI _msgLabel = null;
+        public Button _btnSwitchCtrlMode = null;
+        public TextMeshProUGUI _ctrlModeLabel = null;
         
         private NetworkManager _networkManager = null;
         private EventDispatcher _dispatcher = null;
+        private InputManager _inputManager = null;
         
         private StringBuilder _networkInfo = new StringBuilder();
+        
         
         private String _serverIP;
         private int _serverPort;
@@ -26,6 +32,7 @@ namespace amaz
         {
             _networkManager = RacingGame.Instance().GetService<NetworkManager>();
             _dispatcher = RacingGame.Instance().GetService<EventDispatcher>();
+            _inputManager = RacingGame.Instance().GetService<InputManager>();
             Debug.Log("DebugMenu Awake");
             
             _dispatcher.AddListener<DataReceivedEventArgs>(EventDefine.NETWORK_RECV_DATA,OnNetworkData);
@@ -34,7 +41,10 @@ namespace amaz
         public void Start()
         {
             _networkManager = RacingGame.Instance().GetService<NetworkManager>();
-            Debug.Log("DebugMenu Start");            
+            Debug.Log("DebugMenu Start");      
+            
+            _ctrlModeLabel.text = _inputManager.CtrlMode.ToString();
+            _btnSwitchCtrlMode.onClick.AddListener(OnClickSwitchCtrlMode);
         }
 
         public void Update()
@@ -88,10 +98,15 @@ namespace amaz
 
         private String BuildMsgInfo()
         {
-            
             return String.Empty;
         }
-        
-        
+
+        private void OnClickSwitchCtrlMode()
+        {
+            _inputManager.SwitchMode();
+            _ctrlModeLabel.text = _inputManager.CtrlMode.ToString();
+        }
+
+
     }
 }
