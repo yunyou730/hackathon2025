@@ -10,6 +10,8 @@ namespace amaz
         [SerializeField] 
         public MenuManagerMono MenuRootPrefab = null;
 
+        [SerializeField] public GameObject GameplayPrefab = null;
+
         void Awake()
         {
             _racingGame = new RacingGame(this);

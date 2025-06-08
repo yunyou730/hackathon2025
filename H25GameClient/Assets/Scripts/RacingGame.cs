@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using amaz.gameplay;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -18,6 +19,8 @@ namespace amaz
         NetworkManager _networkManager = null;
         MenuManager _menuManager = null;
         EventDispatcher _eventDispatcher = null;
+        GameplayManager _gameplay = null;
+        InputManager _inputManager = null;
         
         public RacingGame(RacingGameLauncher launcherMono)
         {
@@ -32,12 +35,17 @@ namespace amaz
             _networkManager = new NetworkManager();
             _menuManager = new MenuManager(_launcherMono.MenuRootPrefab);
             _eventDispatcher = new EventDispatcher();
+            _gameplay = new GameplayManager();
+            _inputManager = new InputManager();
             
             RegisterService<NetworkManager>(_networkManager);
             RegisterService<MenuManager>(_menuManager);
             RegisterService<EventDispatcher>(_eventDispatcher);
+            RegisterService<GameplayManager>(_gameplay);
+            RegisterService<InputManager>(_inputManager);
             
             _menuManager.ShowMenu(MenuManager.EMenu.DebugMenu);
+            _gameplay.StartGame(_launcherMono.GameplayPrefab);
         }
 
         public void OnUpdate(float dt)
