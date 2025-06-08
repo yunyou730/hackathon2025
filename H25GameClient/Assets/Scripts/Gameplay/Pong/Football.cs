@@ -54,21 +54,17 @@ namespace amaz.gameplay.pong
             
             // handle football velocity and direction
             ContactPoint contact = collision.contacts[0];
-            ReflectFootball(contact);
+            ReflectFootball(contact,collision.gameObject);
             
             // destroy collision target
-            var hitObject = collision.gameObject;
-            if (hitObject.transform.parent != null)
+            if (IsGameObjectAsHitTarget(collision.gameObject))
             {
-                var hitTarget = hitObject.transform.parent.GetComponent<HitTarget>();
-                if (hitTarget != null)
-                {
-                    hitTarget.HitByOther(1);   
-                }
+                var hitTarget = collision.gameObject.transform.parent.GetComponent<HitTarget>();
+                hitTarget.HitByOther(1);   
             }
         }
 
-        private void ReflectFootball(ContactPoint contact)
+        private void ReflectFootball(ContactPoint contact,GameObject target)
         {
             Vector3 normal = contact.normal;
             
@@ -76,8 +72,16 @@ namespace amaz.gameplay.pong
             Vector3 reflectDirection = Vector3.Reflect(_rigidbody.linearVelocity.normalized, normal);
             Vector3 output = reflectDirection.normalized;
 
+            if (!IsGameObjectAsHitTarget(target))
+            {
+                output = CorrectRflection(input,output);
+            }
+            _rigidbody.linearVelocity = output * _rigidbody.linearVelocity.magnitude;
+        }
+
+        private Vector3 CorrectRflection(Vector3 input,Vector3 output)
+        {
             float dot = Vector3.Dot(input, output);
-            
             //  两个向量 过于 平行的情况下，加一点随机
             if (dot < 0.0f && Mathf.Abs(dot) > 0.9f)   
             {
@@ -93,7 +97,20 @@ namespace amaz.gameplay.pong
                 }
             }
             output = output.normalized;
-            _rigidbody.linearVelocity = output * _rigidbody.linearVelocity.magnitude;
+            return output;
+        }
+
+        private bool IsGameObjectAsHitTarget(GameObject target)
+        {
+            if (target.transform.parent != null)
+            {
+                var hitTarget = target.transform.parent.GetComponent<HitTarget>();
+                if (hitTarget != null)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void Reset()
