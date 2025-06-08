@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DebugMenuPrefab: {fileID: -3271193879704835702, guid: 0345ff8da93744bb8b641194f3012574, type: 3}
+  HUDMenuPrefab: {fileID: 7307436206762292597, guid: d9bba103c84ea4e269697fb77cafd8a4, type: 3}

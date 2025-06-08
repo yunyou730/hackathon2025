@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace amaz.gameplay.pong
 {
@@ -18,10 +20,16 @@ namespace amaz.gameplay.pong
 
         void Start()
         {
-            _dispatcher = RacingGame.Instance().GetService<EventDispatcher>(); 
+            _dispatcher = RacingGame.Instance().GetService<EventDispatcher>();
+            _dispatcher.AddListener(EventDefine.GAMEPLAY_MISSION_COMPLETE,OnMissionComplete);
             _rigidbody = GetComponent<Rigidbody>();
         }
-        
+
+        private void OnDestroy()
+        {
+            _dispatcher.RemoveListener(EventDefine.GAMEPLAY_MISSION_COMPLETE,OnMissionComplete);
+        }
+
         private void FixedUpdate()
         {
             _rigidbody.linearVelocity = _rigidbody.linearVelocity.normalized * _moveSpeed;
@@ -43,8 +51,25 @@ namespace amaz.gameplay.pong
         private void OnCollisionEnter(Collision collision)
         {
             Debug.Log("football.OnCollisionEnter:" + collision.gameObject.name);
-            // 获取第一个接触点的法线
+            
+            // handle football velocity and direction
             ContactPoint contact = collision.contacts[0];
+            ReflectFootball(contact);
+            
+            // destroy collision target
+            var hitObject = collision.gameObject;
+            if (hitObject.transform.parent != null)
+            {
+                var hitTarget = hitObject.transform.parent.GetComponent<HitTarget>();
+                if (hitTarget != null)
+                {
+                    hitTarget.HitByOther(1);   
+                }
+            }
+        }
+
+        private void ReflectFootball(ContactPoint contact)
+        {
             Vector3 normal = contact.normal;
             
             Vector3 input = _rigidbody.linearVelocity.normalized;
@@ -82,6 +107,11 @@ namespace amaz.gameplay.pong
             var root = RacingGame.Instance().GetRootTransform();
             transform.SetParent(root);
             _rigidbody.linearVelocity = new Vector3(1.0f, 1.0f, 0.0f);
+        }
+
+        private void OnMissionComplete()
+        {
+            Reset();
         }
     }
 

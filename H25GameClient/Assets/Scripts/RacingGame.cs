@@ -45,6 +45,7 @@ namespace amaz
             RegisterService<InputManager>(_inputManager);
             
             _menuManager.ShowMenu(MenuManager.EMenu.DebugMenu);
+            _menuManager.ShowMenu(MenuManager.EMenu.HUD);
             _gameplay.StartGame(_launcherMono.GameplayPrefab);
         }
 

@@ -9,6 +9,7 @@ namespace amaz
         public enum EMenu
         {
             DebugMenu,
+            HUD,
             
             Max
         }
@@ -30,6 +31,9 @@ namespace amaz
             {
                 case EMenu.DebugMenu:
                     prefab = _menuRoot.DebugMenuPrefab;
+                    break;
+                case EMenu.HUD:
+                    prefab = _menuRoot.HUDMenuPrefab;
                     break;
             }
             

@@ -58,10 +58,12 @@
     <Compile Include="Assets/Scripts/Menu/MenuManagerMono.cs" />
     <Compile Include="Assets/Scripts/BaseService.cs" />
     <Compile Include="Assets/Scripts/Menu/DebugMenu.cs" />
+    <Compile Include="Assets/Scripts/Gameplay/Pong/HitTarget.cs" />
     <Compile Include="Assets/Scripts/Gameplay/InputManager.cs" />
     <Compile Include="Assets/TutorialInfo/Scripts/Readme.cs" />
     <Compile Include="Assets/Scripts/Event/EventDefine.cs" />
     <Compile Include="Assets/Scripts/Gameplay/Pong/Pong.cs" />
+    <Compile Include="Assets/Scripts/Menu/HUDMenu.cs" />
     <Compile Include="Assets/Scripts/Gameplay/Pong/Player.cs" />
     <Compile Include="Assets/Scripts/Gameplay/Pong/PlayerController.cs" />
     <Compile Include="Assets/Scripts/Menu/MenuManager.cs" />

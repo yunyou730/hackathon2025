@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace amaz.gameplay.pong
@@ -12,14 +13,20 @@ namespace amaz.gameplay.pong
         public Football _football;
         
         private EventDispatcher _dispatcher;
-
         private float _lostCoolDown = 0.0f;
-    
+        
+        
+        private List<HitTarget> _hitTargets;
+        
         void Start()
         {
+            _hitTargets = new List<HitTarget>();
+            
             _dispatcher = RacingGame.Instance().GetService<EventDispatcher>();
             _dispatcher.AddListener(EventDefine.GAMEPLAY_LOST_1P,OnLostBy1P);
             _dispatcher.AddListener(EventDefine.GAMEPLAY_LOST_2P,OnLostBy2P);
+            _dispatcher.AddListener<HitTarget>(EventDefine.GAMEPLAY_HIT_TARGET_SPANW,OnHitTargetSpawned);
+            _dispatcher.AddListener<HitTarget>(EventDefine.GAMEPLAY_HIT_TARGET_DEAD,OnHitTargetDead);
             
             _p1.SetBound(_playerMoveBound);
             _p2.SetBound(_playerMoveBound);
@@ -30,6 +37,8 @@ namespace amaz.gameplay.pong
         {
             _dispatcher.RemoveListener(EventDefine.GAMEPLAY_LOST_1P,OnLostBy1P);
             _dispatcher.RemoveListener(EventDefine.GAMEPLAY_LOST_2P,OnLostBy2P);
+            _dispatcher.RemoveListener<HitTarget>(EventDefine.GAMEPLAY_HIT_TARGET_SPANW,OnHitTargetSpawned);
+            _dispatcher.RemoveListener<HitTarget>(EventDefine.GAMEPLAY_HIT_TARGET_DEAD,OnHitTargetDead);            
         }
 
         void Update()
@@ -52,6 +61,7 @@ namespace amaz.gameplay.pong
         private void ResetGame()
         {
             Debug.Log("pong - ResetGame");
+            _dispatcher.Dispatch(EventDefine.GAMEPLAY_RESTART);
             
             // reset player position
             Vector3 p1Pos = _p1.transform.position;
@@ -76,6 +86,20 @@ namespace amaz.gameplay.pong
             _lostCoolDown = LostCoolDownTime;
         }
 
+        void OnHitTargetSpawned(HitTarget hitTarget)
+        {
+            _hitTargets.Add(hitTarget);
+        }
+        void OnHitTargetDead(HitTarget hitTarget)
+        {
+            _hitTargets.Remove(hitTarget);
+            GameObject.Destroy(hitTarget.gameObject);
+            if (_hitTargets.Count <= 0)
+            {
+                Debug.Log("pong - ClearAll Hit Targets!");
+                _dispatcher.Dispatch(EventDefine.GAMEPLAY_MISSION_COMPLETE);
+            }
+        }
     }
 }
 
