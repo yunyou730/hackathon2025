@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MobileController</string>
+    <string name="player_prompt">选择玩家</string>
 </resources>

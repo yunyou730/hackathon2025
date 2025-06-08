@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 按下状态 -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#FF4CAF50" /> <!-- 绿色调 -->
+            <stroke android:width="2dp" android:color="#FF2E7D32" /> <!-- 深绿色边框 -->
+            <size android:width="60dp" android:height="60dp" />
+        </shape>
+    </item>
+    
+    <!-- 正常状态 -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#804CAF50" /> <!-- 半透明绿色 -->
+            <stroke android:width="2dp" android:color="#FF4CAF50" /> <!-- 绿色边框 -->
+            <size android:width="60dp" android:height="60dp" />
+        </shape>
+    </item>
+</selector>

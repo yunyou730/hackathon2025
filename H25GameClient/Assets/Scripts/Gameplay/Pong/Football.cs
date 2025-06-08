@@ -83,7 +83,7 @@ namespace amaz.gameplay.pong
         {
             float dot = Vector3.Dot(input, output);
             //  两个向量 过于 平行的情况下，加一点随机
-            if (dot < 0.0f && Mathf.Abs(dot) > 0.9f)   
+            if (dot < 0.0f && Mathf.Abs(dot) > 0.95f)   
             {
                 Debug.Log("fix dir manually!");
                 float rdv = Random.value;

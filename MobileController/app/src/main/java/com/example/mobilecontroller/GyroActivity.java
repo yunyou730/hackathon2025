@@ -10,9 +10,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,8 +26,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
 
-public class GyroActivity extends Activity implements SensorEventListener {
+import android.widget.AdapterView;
+
+
+public class GyroActivity extends Activity implements SensorEventListener,View.OnTouchListener {
     private static final String TAG = "GyroUDP";
     private SensorManager sensorManager;
     private Sensor gyroscopeSensor;
@@ -38,6 +45,16 @@ public class GyroActivity extends Activity implements SensorEventListener {
     private boolean isConnected = false;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    private Button buttonUp, buttonDown, buttonA, buttonB;
+    // 按键状态映射（避免重复发送）
+    private boolean isUpPressed = false;
+    private boolean isDownPressed = false;
+    private boolean isAPressed = false;
+    private boolean isBPressed = false;
+
+    private Spinner playerSpinner; // 新增：玩家选择下拉框
+    private int currentPlayer = 1; // 1P 或 2P，默认为 1P
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +66,16 @@ public class GyroActivity extends Activity implements SensorEventListener {
         portEditText = findViewById(R.id.port_edit_text);
         connectButton = findViewById(R.id.connect_button);
 
+        buttonUp = findViewById(R.id.button_up);
+        buttonDown = findViewById(R.id.button_down);
+        buttonA = findViewById(R.id.button_a);
+        buttonB = findViewById(R.id.button_b);
+
+        // 设置按键触摸监听（处理按下和抬起事件）
+        buttonUp.setOnTouchListener(this);
+        buttonDown.setOnTouchListener(this);
+        buttonA.setOnTouchListener(this);
+        buttonB.setOnTouchListener(this);
         // 设置连接按钮点击事件
         connectButton.setOnClickListener(v -> {
             String ip = ipEditText.getText().toString().trim();
@@ -69,6 +96,22 @@ public class GyroActivity extends Activity implements SensorEventListener {
                 e.printStackTrace();
             }
         });
+
+        // 初始化玩家选择下拉框
+        playerSpinner = findViewById(R.id.player_spinner);
+        playerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentPlayer = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+            // 原有的监听器代码
+        });
+
 
         // 初始化传感器
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -137,7 +180,8 @@ public class GyroActivity extends Activity implements SensorEventListener {
             mainHandler.post(() -> gyroTextView.setText("陀螺仪数据:\nX: " + x + " rad/s\nY: " + y + " rad/s\nZ: " + z + " rad/s"));
 
             // 发送UDP数据
-            sendUDPData(data);
+            // @miao @test ,temp forbid
+            //sendUDPData(data);
         }
     }
 
@@ -160,4 +204,71 @@ public class GyroActivity extends Activity implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // 不需要处理
     }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (!isConnected)
+        {
+            return false; // 未连接时忽略所有操作
+        }
+
+        String command = "";
+        int vid = v.getId();
+        if(vid == R.id.button_up)
+        {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!isUpPressed) {
+                    command = "UP_PRESS";
+                    isUpPressed = true;
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                command = "UP_RELEASE";
+                isUpPressed = false;
+            }
+        }
+        else if(vid == R.id.button_down)
+        {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!isDownPressed) {
+                    command = "DOWN_PRESS";
+                    isDownPressed = true;
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                command = "DOWN_RELEASE";
+                isDownPressed = false;
+            }
+        }
+        else if(vid == R.id.button_a)
+        {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!isAPressed) {
+                    command = "A_PRESS";
+                    isAPressed = true;
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                command = "A_RELEASE";
+                isAPressed = false;
+            }
+        }
+        else if(vid == R.id.button_b)
+        {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (!isBPressed) {
+                    command = "B_PRESS";
+                    isBPressed = true;
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                command = "B_RELEASE";
+                isBPressed = false;
+            }
+        }
+        if (!command.isEmpty()) {
+            command = "P" + (currentPlayer + 1) + ";" + command;   // player index
+            sendUDPData(command); // 发送按键状态指令
+            return true; // 消耗事件，避免重复触发
+        }
+        return false;
+    }
+
+
 }

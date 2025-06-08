@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- 原有输入框和连接按钮 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,6 +37,31 @@
             android:text="连接" />
     </LinearLayout>
 
+    <!-- 新增：玩家选择下拉框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="玩家选择："
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp" />
+
+        <Spinner
+            android:id="@+id/player_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/players"
+            android:prompt="@string/player_prompt"
+            android:background="@android:drawable/btn_dropdown" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/gyro_text_view"
         android:layout_width="match_parent"
@@ -45,4 +71,58 @@
         android:text="陀螺仪数据未连接"
         android:textSize="14sp" />
 
+    <!-- 虚拟按键区域保持不变 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp">
+
+        <!-- 上键 -->
+        <Button
+            android:id="@+id/button_up"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            android:text="↑"
+            android:textSize="20sp"
+            android:background="@drawable/button_selector" />
+
+        <!-- 下键 -->
+        <Button
+            android:id="@+id/button_down"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_below="@id/button_up"
+            android:layout_centerHorizontal="true"
+            android:text="↓"
+            android:textSize="20sp"
+            android:background="@drawable/button_selector" />
+
+        <!-- A键和B键并排 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/button_down"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/button_a"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="A"
+                android:textSize="18sp"
+                android:background="@drawable/button_selector"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/button_b"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:text="B"
+                android:textSize="18sp"
+                android:background="@drawable/button_selector" />
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

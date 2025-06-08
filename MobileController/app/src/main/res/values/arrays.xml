@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="players">
+        <item>1P (玩家1)</item>
+        <item>2P (玩家2)</item>
+    </string-array>
+</resources>

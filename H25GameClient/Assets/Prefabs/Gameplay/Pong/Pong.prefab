@@ -395,7 +395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: 0
-  _moveSpeed: 5
+  _moveSpeed: 6
   _kickOffPoint: {fileID: 1133133895148998992}
 --- !u!1 &6314199033024596251
 GameObject:
@@ -833,7 +833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: 1
-  _moveSpeed: 5
+  _moveSpeed: 6
   _kickOffPoint: {fileID: 4442477931693658282}
 --- !u!1001 &2349704692738729980
 PrefabInstance:
