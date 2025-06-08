@@ -33,6 +33,11 @@ namespace amaz.gameplay.pong
                 DoKickOff();
             }
 
+            if (_football != null)
+            {
+                _football.transform.position = _kickOffPoint.position;
+            }
+
             UpdateMovement(Time.deltaTime);
         }
         
@@ -43,7 +48,9 @@ namespace amaz.gameplay.pong
 
         public void CatchFootball(Football football)
         {
-            football.transform.position = _kickOffPoint.position;
+            football.Reset();
+            football.transform.position = _kickOffPoint.position;     
+            //football.transform.SetParent(transform,true);
             _football = football;
         }
 

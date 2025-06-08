@@ -13,5 +13,8 @@ namespace amaz
         public static string GAMEPLAY_START = "GAMEPLAY_START";
         public static string GAMEPLAY_PAUSE = "GAMEPLAY_PAUSE";
         public static string GAMELAY_RESUME = "GAMEPLAY_RESUME";
+
+        public static string GAMEPLAY_LOST_1P = "GAMEPLAY_LOST_1P";
+        public static string GAMEPLAY_LOST_2P = "GAMEPLAY_LOST_2P";
     }
 }
