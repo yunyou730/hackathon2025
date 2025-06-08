@@ -55,7 +55,16 @@ namespace amaz.gameplay.pong
             //  两个向量 过于 平行的情况下，加一点随机
             if (dot < 0.0f && Mathf.Abs(dot) > 0.9f)   
             {
-                output.x = Random.value * 2.0f - 1.0f;
+                Debug.Log("fix dir manually!");
+                float rdv = Random.value;
+                if (input.x > 0.0f)
+                {
+                    output.x = rdv;
+                }
+                else
+                {
+                    output.x = -rdv;
+                }
             }
             output = output.normalized;
 
