@@ -26,6 +26,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -212,7 +213,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
 
         if(hasGyroChanged || hasRotChanged)
         {
-            // gui
+            // 刷新 gui
             String gyroInfo = "陀螺仪:\nX: " + gx + " rad/s\nY: " + gy + " rad/s\nZ: " + gz + " rad/s" + "\n";
             String rotInfo = "欧拉角:(" + rx + "," + ry + "," + rz + ")";
             String info = gyroInfo + rotInfo;
@@ -221,12 +222,9 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
             // 发送UDP数据
             if(isConnected)
             {
-                // 格式化数据
-                //String data = String.format("GYRO|%.2f|%.2f|%.2f", x, y, z);
-                // @miao @test ,temp forbid
-                //sendUDPData(data);
+                String data = String.format("GYRO|P%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f", currentPlayer + 1,gx, gy, gz,rx,ry,rz);
+                sendUDPData(data);
             }
-
         }
     }
 
@@ -234,7 +232,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
         if (udpSocket != null && serverAddress != null) {
             new Thread(() -> {
                 try {
-                    byte[] buffer = data.getBytes();
+                    byte[] buffer = data.getBytes(StandardCharsets.UTF_8);
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, serverAddress, serverPort);
                     udpSocket.send(packet);
                 } catch (IOException e) {
