@@ -36,6 +36,8 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
     private static final String TAG = "GyroUDP";
     private SensorManager sensorManager;
     private Sensor gyroscopeSensor;
+    private Sensor rotationVectorSensor;
+
     private TextView gyroTextView;
     private EditText ipEditText, portEditText;
     private Button connectButton;
@@ -54,6 +56,9 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
 
     private Spinner playerSpinner; // 新增：玩家选择下拉框
     private int currentPlayer = 1; // 1P 或 2P，默认为 1P
+
+    float gx,gy,gz;     // gyro sensor
+    float rx,ry,rz;     // rotation sensor
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,9 +121,15 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
         // 初始化传感器
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         if (gyroscopeSensor == null) {
             Toast.makeText(this, "设备不支持陀螺仪", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        if(rotationVectorSensor == null)
+        {
+            Toast.makeText(this, "设备不支持rotationVector", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -138,6 +149,8 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
 
         if (isConnected) {
             sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
         } else {
             sensorManager.unregisterListener(this);
             if (udpSocket != null) {
@@ -152,6 +165,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
         super.onResume();
         if (isConnected) {
             sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
@@ -168,20 +182,51 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && isConnected) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
+        boolean hasGyroChanged = false;
+        boolean hasRotChanged = false;
 
-            // 格式化数据
-            String data = String.format("GYRO|%.2f|%.2f|%.2f", x, y, z);
 
-            // 更新UI
-            mainHandler.post(() -> gyroTextView.setText("陀螺仪数据:\nX: " + x + " rad/s\nY: " + y + " rad/s\nZ: " + z + " rad/s"));
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            hasGyroChanged = true;
+            gx = event.values[0];
+            gy = event.values[1];
+            gz = event.values[2];
+
+        }
+        else if(event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+        {
+            hasRotChanged = true;
+
+            float[] rotationMatrix = new float[9];
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+            float[] orientation = new float[3];
+            SensorManager.getOrientation(rotationMatrix, orientation);
+            float yaw = (float) Math.toDegrees(orientation[0]);
+            float pitch = (float) Math.toDegrees(orientation[1]);
+            float roll = (float) Math.toDegrees(orientation[2]);
+
+            rx = yaw;
+            ry = pitch;
+            rz = roll;
+        }
+
+        if(hasGyroChanged || hasRotChanged)
+        {
+            // gui
+            String gyroInfo = "陀螺仪:\nX: " + gx + " rad/s\nY: " + gy + " rad/s\nZ: " + gz + " rad/s" + "\n";
+            String rotInfo = "欧拉角:(" + rx + "," + ry + "," + rz + ")";
+            String info = gyroInfo + rotInfo;
+            mainHandler.post(() -> gyroTextView.setText(info));
 
             // 发送UDP数据
-            // @miao @test ,temp forbid
-            //sendUDPData(data);
+            if(isConnected)
+            {
+                // 格式化数据
+                //String data = String.format("GYRO|%.2f|%.2f|%.2f", x, y, z);
+                // @miao @test ,temp forbid
+                //sendUDPData(data);
+            }
+
         }
     }
 
