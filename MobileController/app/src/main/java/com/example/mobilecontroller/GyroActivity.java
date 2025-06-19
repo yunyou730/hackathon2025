@@ -222,7 +222,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
             // 发送UDP数据
             if(isConnected)
             {
-                String data = String.format("GYRO|P%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f", currentPlayer + 1,gx, gy, gz,rx,ry,rz);
+                String data = String.format("GYRO|P%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f", (currentPlayer + 1),gx, gy, gz,rx,ry,rz);
                 sendUDPData(data);
             }
         }
