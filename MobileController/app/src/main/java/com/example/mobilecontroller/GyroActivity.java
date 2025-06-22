@@ -150,7 +150,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
 
         if (isConnected) {
             sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME);
-            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
 
         } else {
             sensorManager.unregisterListener(this);
@@ -166,7 +166,7 @@ public class GyroActivity extends Activity implements SensorEventListener,View.O
         super.onResume();
         if (isConnected) {
             sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_GAME);
-            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_GAME);
         }
     }
 
